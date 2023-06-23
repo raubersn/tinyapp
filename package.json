@@ -1,0 +1,20 @@
+{
+  "name": "tinyapp",
+  "version": "1.0.0",
+  "description": "URL shortening service similar to TinyURL, Bitly, or Goo.gl. In essence, a URL Shortener is a service that takes a regular URL and transforms it into an encoded version, which redirects back to the original URL.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/raubersn/tinyapp.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/raubersn/tinyapp/issues"
+  },
+  "homepage": "https://github.com/raubersn/tinyapp#readme"
+}
