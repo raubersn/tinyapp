@@ -62,10 +62,11 @@ app.get("/urls", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
-  urlDatabase[generateRandomString()] = req.body.longURL;
+  const tinyId = generateRandomString();
 
-  console.log(req.body); // Log the POST request body to the console
-  res.send("Ok"); // Respond with 'Ok' (we will replace this)
+  urlDatabase[tinyId] = req.body.longURL;
+
+  res.redirect("/urls/" + tinyId);
 });
 
 app.get("/urls/new", (req, res) => {
@@ -75,6 +76,10 @@ app.get("/urls/new", (req, res) => {
 app.get("/urls/:id", (req, res) => {
   const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id] };
   res.render("urls_show", templateVars);
+});
+
+app.get("/u/:id", (req, res) => {
+  res.redirect(urlDatabase[req.params.id]);  
 });
 
 app.listen(PORT, () => {
