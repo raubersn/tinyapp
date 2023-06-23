@@ -2,8 +2,9 @@
   "name": "tinyapp",
   "version": "1.0.0",
   "description": "URL shortening service similar to TinyURL, Bitly, or Goo.gl. In essence, a URL Shortener is a service that takes a regular URL and transforms it into an encoded version, which redirects back to the original URL.",
-  "main": "index.js",
+  "main": "express_server.js",
   "scripts": {
+    "start": "./node_modules/.bin/nodemon -L express_server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -11,7 +12,7 @@
     "url": "git+https://github.com/raubersn/tinyapp.git"
   },
   "keywords": [],
-  "author": "",
+  "author": "Rauber Simoes do Nascimento <raubersn@gmail.com> (https://github.com/raubersn/)",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/raubersn/tinyapp/issues"
@@ -20,5 +21,8 @@
   "dependencies": {
     "ejs": "^3.1.9",
     "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.22"
   }
 }
