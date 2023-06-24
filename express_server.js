@@ -94,6 +94,12 @@ app.get("/u/:id", (req, res) => {
   res.redirect(urlDatabase[req.params.id]);  
 });
 
+app.post("/login", (req, res) => {
+  res.cookie("username", req.body.username);
+  
+  res.redirect("/urls");
+});
+
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
