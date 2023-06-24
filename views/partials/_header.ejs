@@ -24,7 +24,7 @@
           class="form-control"
           type="text"
           name="username"
-          placeholder="Username"
+          placeholder="<%=(username === undefined ? 'Username' : username)%>"
           style="width: 300px; margin: 1em"
         />
         <button type="submit" class="btn btn-outline-dark">Login</button>
