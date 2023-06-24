@@ -9,6 +9,7 @@ app.use(cookieParser());
 
 const PORT = 8080; // default port 8080
 const SHORT_URL_LENGTH = 6;
+const USER_NAME = "username";
 
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
@@ -66,7 +67,7 @@ app.get("/fetch", (req, res) => {
 app.get("/urls", (req, res) => {
   const templateVars = { 
     urls: urlDatabase,
-    username: req.cookies["username"]
+    username: req.cookies[USER_NAME]
   };
 
   res.render("urls_index", templateVars);
@@ -82,7 +83,7 @@ app.post("/urls", (req, res) => {
 
 app.get("/urls/new", (req, res) => {
   const templateVars = { 
-    username: req.cookies["username"]
+    username: req.cookies[USER_NAME]
   };
   
   res.render("urls_new", templateVars);
@@ -92,7 +93,7 @@ app.get("/urls/:id", (req, res) => {
   const templateVars = { 
     id: req.params.id, 
     longURL: urlDatabase[req.params.id],
-    username: req.cookies["username"]
+    username: req.cookies[USER_NAME]
    };
 
   res.render("urls_show", templateVars);
@@ -115,7 +116,13 @@ app.get("/u/:id", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-  res.cookie("username", req.body.username);
+  res.cookie(USER_NAME, req.body.username);
+  
+  res.redirect("/urls");
+});
+
+app.post("/logout", (req, res) => {
+  res.clearCookie(USER_NAME);
   
   res.redirect("/urls");
 });
