@@ -27,7 +27,17 @@ const users = {
   */
 };
 
-function generateRandomCharCode() {
+const getUserByEmail = (email) => {
+  for (let user in users) {
+    if (users[user].email === email) {
+      return (users[user]);
+    }
+  }
+
+  return (null);
+};
+
+const generateRandomCharCode = () => {
   const min = 48; // 0 (ASCII code)
   const max = 122; // z (ASCII code)
 
@@ -147,19 +157,21 @@ app.get("/register", (req, res) => {
 });
 
 app.post("/register", (req, res) => {
-  //res.clearCookie(COOKIE_USER_ID);
-  
-  const userID = generateRandomString();
+  if (!req.body.email || !req.body.password || getUserByEmail(req.body.email)) {
+    res.sendStatus(400);    
+  } else {
+    const userID = generateRandomString();
 
-  users[userID] = {
-    id: userID,
-    email: req.body.email,
-    password: req.body.password
-  };
-  
-  res.cookie(COOKIE_USER_ID, userID);
-  
-  res.redirect("/urls");
+    users[userID] = {
+      id: userID,
+      email: req.body.email,
+      password: req.body.password
+    };
+    
+    res.cookie(COOKIE_USER_ID, userID);
+    
+    res.redirect("/urls");
+  }
 });
 
 app.listen(PORT, () => {
