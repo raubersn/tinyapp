@@ -147,15 +147,20 @@ app.get("/login", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-  res.cookie(COOKIE_USER_ID, req.body.username);
-  
-  res.redirect("/urls");
+  const userFound = getUserByEmail(req.body.email);
+
+  if (!userFound || userFound.password !== req.body.password) {
+    res.sendStatus(403);
+  } else {
+    res.cookie(COOKIE_USER_ID, userFound.id);
+    res.redirect("/urls");
+  }
 });
 
 app.post("/logout", (req, res) => {
   res.clearCookie(COOKIE_USER_ID);
   
-  res.redirect("/urls");
+  res.redirect("/login");
 });
 
 app.get("/register", (req, res) => {
