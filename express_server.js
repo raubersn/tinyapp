@@ -136,6 +136,16 @@ app.get("/u/:id", (req, res) => {
   res.redirect(urlDatabase[req.params.id]);  
 });
 
+app.get("/login", (req, res) => {
+  res.clearCookie(COOKIE_USER_ID);
+
+  const templateVars = { 
+    user: undefined
+  };
+
+  res.render("users_login", templateVars);
+});
+
 app.post("/login", (req, res) => {
   res.cookie(COOKIE_USER_ID, req.body.username);
   
