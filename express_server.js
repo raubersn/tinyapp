@@ -9,11 +9,22 @@ app.use(cookieParser());
 
 const PORT = 8080; // default port 8080
 const SHORT_URL_LENGTH = 6;
-const USER_NAME = "username";
+const COOKIE_USER_ID = "user_id";
 
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
+};
+
+const users = {
+  //Will receive user objects such as:
+  /*
+    userRandomID: {
+    id: "userRandomID",
+    email: "user@example.com",
+    password: "purple-monkey-dinosaur",
+  }
+  */
 };
 
 function generateRandomCharCode() {
@@ -67,7 +78,7 @@ app.get("/fetch", (req, res) => {
 app.get("/urls", (req, res) => {
   const templateVars = { 
     urls: urlDatabase,
-    username: req.cookies[USER_NAME]
+    user: users[req.cookies[COOKIE_USER_ID]]
   };
 
   res.render("urls_index", templateVars);
@@ -83,7 +94,7 @@ app.post("/urls", (req, res) => {
 
 app.get("/urls/new", (req, res) => {
   const templateVars = { 
-    username: req.cookies[USER_NAME]
+    user: users[req.cookies[COOKIE_USER_ID]]
   };
   
   res.render("urls_new", templateVars);
@@ -93,7 +104,7 @@ app.get("/urls/:id", (req, res) => {
   const templateVars = { 
     id: req.params.id, 
     longURL: urlDatabase[req.params.id],
-    username: req.cookies[USER_NAME]
+    user: users[req.cookies[COOKIE_USER_ID]]
    };
 
   res.render("urls_show", templateVars);
@@ -116,23 +127,39 @@ app.get("/u/:id", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-  res.cookie(USER_NAME, req.body.username);
+  res.cookie(COOKIE_USER_ID, req.body.username);
   
   res.redirect("/urls");
 });
 
 app.post("/logout", (req, res) => {
-  res.clearCookie(USER_NAME);
+  res.clearCookie(COOKIE_USER_ID);
   
   res.redirect("/urls");
 });
 
 app.get("/register", (req, res) => {
   const templateVars = { 
-    username: req.cookies[USER_NAME]
+    user: users[req.cookies[COOKIE_USER_ID]]
+  };
+
+  res.render("users_new", templateVars);
+});
+
+app.post("/register", (req, res) => {
+  //res.clearCookie(COOKIE_USER_ID);
+  
+  const userID = generateRandomString();
+
+  users[userID] = {
+    id: userID,
+    email: req.body.email,
+    password: req.body.password
   };
   
-  res.render("users_new", templateVars);
+  res.cookie(COOKIE_USER_ID, userID);
+  
+  res.redirect("/urls");
 });
 
 app.listen(PORT, () => {
