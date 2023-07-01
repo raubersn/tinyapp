@@ -1,5 +1,6 @@
 const express = require("express");
 const cookieParser = require('cookie-parser');
+const bcrypt = require("bcryptjs");
 
 const app = express();
 
@@ -224,7 +225,7 @@ app.get("/login", (req, res) => {
 app.post("/login", (req, res) => {
   const userFound = getUserByEmail(req.body.email);
 
-  if (!userFound || userFound.password !== req.body.password) {
+  if (!userFound || !bcrypt.compareSync(req.body.password, userFound.password)) {
     res.status(403).send("Wrong email and/or password")
   } else {
     res.cookie(COOKIE_USER_ID, userFound.id);
@@ -261,7 +262,7 @@ app.post("/register", (req, res) => {
     users[userID] = {
       id: userID,
       email: req.body.email,
-      password: req.body.password
+      password: bcrypt.hashSync(req.body.password, 10)
     };
     
     res.cookie(COOKIE_USER_ID, userID);
