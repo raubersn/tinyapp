@@ -1,16 +1,22 @@
 const express = require("express");
-const cookieParser = require('cookie-parser');
+const cookieSession = require('cookie-session');
 const bcrypt = require("bcryptjs");
 
 const app = express();
 
 app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser());
+app.use(cookieSession({
+  name: 'session',
+  /* secret keys */
+  keys: ['Galo', 'Doido'],
+
+  // Cookie Options
+  maxAge: 24 * 60 * 60 * 1000 // 24 hours
+}));
 
 const PORT = 8080; // default port 8080
 const SHORT_URL_LENGTH = 6;
-const COOKIE_USER_ID = "user_id";
 const ACCESS_DENIED = "Access denied! This feature is only available to registered users.";
 const NO_PRIVILEGES = "Access denied! You do not have privileges over this TinyURL.";
 const UNEXISTING_URL = "The TinyURL informed does not exists.";
@@ -117,12 +123,12 @@ app.get("/fetch", (req, res) => {
 
 //serious stuff
 app.get("/urls", (req, res) => {
-  if (!req.cookies[COOKIE_USER_ID]) {
+  if (!req.session.user_id) {
     res.status(403).send(ACCESS_DENIED);
   } else {
     const templateVars = { 
-      urls: urlsForUser(req.cookies[COOKIE_USER_ID]),
-      user: users[req.cookies[COOKIE_USER_ID]]
+      urls: urlsForUser(req.session.user_id),
+      user: users[req.session.user_id]
     };
 
     res.render("urls_index", templateVars);
@@ -130,25 +136,25 @@ app.get("/urls", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
-  if (!req.cookies[COOKIE_USER_ID]) {
+  if (!req.session.user_id) {
     res.status(403).send(ACCESS_DENIED);
   } else {
     const tinyId = generateRandomString();
 
     urlDatabase[tinyId] = {};
     urlDatabase[tinyId].longURL = req.body.longURL;
-    urlDatabase[tinyId].userID = req.cookies[COOKIE_USER_ID];
+    urlDatabase[tinyId].userID = req.session.user_id;
 
     res.redirect("/urls/" + tinyId);
   }
 });
 
 app.get("/urls/new", (req, res) => {
-  if (!req.cookies[COOKIE_USER_ID]) {
+  if (!req.session.user_id) {
     res.redirect("/login");
   } else {
     const templateVars = { 
-      user: users[req.cookies[COOKIE_USER_ID]]
+      user: users[req.session.user_id]
     };
     
     res.render("urls_new", templateVars);
@@ -158,15 +164,15 @@ app.get("/urls/new", (req, res) => {
 app.get("/urls/:id", (req, res) => {
   if (urlDatabase[req.params.id] === undefined) {
     res.status(400).send(UNEXISTING_URL);
-  } else if (!req.cookies[COOKIE_USER_ID]) {
+  } else if (!req.session.user_id) {
     res.status(403).send(ACCESS_DENIED);
-  } else if (urlDatabase[req.params.id].userID !== req.cookies[COOKIE_USER_ID]) {
+  } else if (urlDatabase[req.params.id].userID !== req.session.user_id) {
     res.status(403).send(NO_PRIVILEGES);
   }  else {
     const templateVars = { 
       id: req.params.id, 
       longURL: urlDatabase[req.params.id].longURL,
-      user: users[req.cookies[COOKIE_USER_ID]]
+      user: users[req.session.user_id]
     };
 
     res.render("urls_show", templateVars);
@@ -176,9 +182,9 @@ app.get("/urls/:id", (req, res) => {
 app.post("/urls/:id", (req, res) => {
   if (urlDatabase[req.params.id] === undefined) {
     res.status(400).send(UNEXISTING_URL);
-  } else if (!req.cookies[COOKIE_USER_ID]) {
+  } else if (!req.session.user_id) {
     res.status(403).send(ACCESS_DENIED);
-  } else if (urlDatabase[req.params.id].userID !== req.cookies[COOKIE_USER_ID]) {
+  } else if (urlDatabase[req.params.id].userID !== req.session.user_id) {
     res.status(403).send(NO_PRIVILEGES);
   }  else {
     urlDatabase[req.params.id].longURL = req.body.longURL;
@@ -190,9 +196,9 @@ app.post("/urls/:id", (req, res) => {
 app.post("/urls/:id/delete", (req, res) => {
   if (urlDatabase[req.params.id] === undefined) {
     res.status(400).send(UNEXISTING_URL);
-  } else if (!req.cookies[COOKIE_USER_ID]) {
+  } else if (!req.session.user_id) {
     res.status(403).send(ACCESS_DENIED);
-  } else if (urlDatabase[req.params.id].userID !== req.cookies[COOKIE_USER_ID]) {
+  } else if (urlDatabase[req.params.id].userID !== req.session.user_id) {
     res.status(403).send(NO_PRIVILEGES);
   }  else {
     delete urlDatabase[req.params.id];
@@ -211,7 +217,7 @@ app.get("/u/:id", (req, res) => {
 });
 
 app.get("/login", (req, res) => {
-  if (req.cookies[COOKIE_USER_ID]) {
+  if (req.session.user_id) {
     res.redirect("/urls");
   } else {
     const templateVars = { 
@@ -228,23 +234,23 @@ app.post("/login", (req, res) => {
   if (!userFound || !bcrypt.compareSync(req.body.password, userFound.password)) {
     res.status(403).send("Wrong email and/or password")
   } else {
-    res.cookie(COOKIE_USER_ID, userFound.id);
+    req.session.user_id = userFound.id;
     res.redirect("/urls");
   }
 });
 
 app.post("/logout", (req, res) => {
-  res.clearCookie(COOKIE_USER_ID);
+  req.session.user_id = null;
   
   res.redirect("/login");
 });
 
 app.get("/register", (req, res) => {
-  if (req.cookies[COOKIE_USER_ID]) {
+  if (req.session.user_id) {
     res.redirect("/urls");
   } else {
     const templateVars = { 
-      user: users[req.cookies[COOKIE_USER_ID]]
+      user: users[req.session.user_id]
     };
   
     res.render("users_new", templateVars);
@@ -265,7 +271,7 @@ app.post("/register", (req, res) => {
       password: bcrypt.hashSync(req.body.password, 10)
     };
     
-    res.cookie(COOKIE_USER_ID, userID);
+    req.session.user_id = userID;
     
     res.redirect("/urls");
   }
