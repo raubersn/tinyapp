@@ -95,19 +95,27 @@ app.get("/urls", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
-  const tinyId = generateRandomString();
+  if (!req.cookies[COOKIE_USER_ID]) {
+    res.status(403).send("Access denied! This feature is available only to registered users.");
+  } else {
+    const tinyId = generateRandomString();
 
-  urlDatabase[tinyId] = req.body.longURL;
+    urlDatabase[tinyId] = req.body.longURL;
 
-  res.redirect("/urls/" + tinyId);
+    res.redirect("/urls/" + tinyId);
+  }
 });
 
 app.get("/urls/new", (req, res) => {
-  const templateVars = { 
-    user: users[req.cookies[COOKIE_USER_ID]]
-  };
-  
-  res.render("urls_new", templateVars);
+  if (!req.cookies[COOKIE_USER_ID]) {
+    res.redirect("/login");
+  } else {    
+    const templateVars = { 
+      user: users[req.cookies[COOKIE_USER_ID]]
+    };
+    
+    res.render("urls_new", templateVars);
+  }
 });
 
 app.get("/urls/:id", (req, res) => {
@@ -133,24 +141,31 @@ app.post("/urls/:id/delete", (req, res) => {
 });
 
 app.get("/u/:id", (req, res) => {
-  res.redirect(urlDatabase[req.params.id]);  
+  if (urlDatabase[req.params.id]) {
+    res.redirect(urlDatabase[req.params.id]);
+  } else {
+    res.status(400).send("The TinyURL informed does not exists.");
+  }
+  
 });
 
 app.get("/login", (req, res) => {
-  res.clearCookie(COOKIE_USER_ID);
+  if (req.cookies[COOKIE_USER_ID]) {
+    res.redirect("/urls");
+  } else {
+    const templateVars = { 
+      user: undefined
+    };
 
-  const templateVars = { 
-    user: undefined
-  };
-
-  res.render("users_login", templateVars);
+    res.render("users_login", templateVars);
+  }
 });
 
 app.post("/login", (req, res) => {
   const userFound = getUserByEmail(req.body.email);
 
   if (!userFound || userFound.password !== req.body.password) {
-    res.sendStatus(403);
+    res.status(403).send("Wrong email and/or password")
   } else {
     res.cookie(COOKIE_USER_ID, userFound.id);
     res.redirect("/urls");
@@ -164,16 +179,22 @@ app.post("/logout", (req, res) => {
 });
 
 app.get("/register", (req, res) => {
-  const templateVars = { 
-    user: users[req.cookies[COOKIE_USER_ID]]
-  };
-
-  res.render("users_new", templateVars);
+  if (req.cookies[COOKIE_USER_ID]) {
+    res.redirect("/urls");
+  } else {
+    const templateVars = { 
+      user: users[req.cookies[COOKIE_USER_ID]]
+    };
+  
+    res.render("users_new", templateVars);
+  }
 });
 
 app.post("/register", (req, res) => {
-  if (!req.body.email || !req.body.password || getUserByEmail(req.body.email)) {
-    res.sendStatus(400);    
+  if (!req.body.email || !req.body.password) {
+    res.status(400).send("Email and/or password cannot be empty")
+  } else if  (getUserByEmail(req.body.email)) {
+    res.status(400).send("This user is already registered")
   } else {
     const userID = generateRandomString();
 
