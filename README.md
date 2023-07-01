@@ -3,6 +3,12 @@
 TinyApp is a full stack web application built with Node and Express that allows users to shorten long URLs (à la bit.ly). In essence, a URL Shortener is a service that takes a regular URL and transforms it into an encoded version, which redirects back to the original URL.
 
 
+## Final Product
+
+!["screenshot of URLs page"](https://github.com/raubersn/tinyapp/blob/main/docs/list-url.jpg)
+!["screenshot of creating a short URL"](https://github.com/raubersn/tinyapp/blob/main/docs/new-url.jpg)
+!["screenshot of editing a short URL"](https://github.com/raubersn/tinyapp/blob/main/docs/edit-url.jpg)
+
 ## Dependencies
 
 - Node.js
