@@ -37,7 +37,7 @@
                 <td><%= urls[id].longURL %></td>
                 <td><button type="button" class="btn btn-outline-primary" onclick="location.href='/urls/<%=id%>';">Edit</button></td>
                 <td>
-                  <form method="POST" <%="id=" + id + " action=urls/" + id + "/delete" %>>
+                  <form method="POST" <%="id=" + id + " action=urls/" + id + "?_method=DELETE" %>>
                     <button type="submit" class="btn btn-outline-danger">Delete</button>
                   </form>
                 </td>              

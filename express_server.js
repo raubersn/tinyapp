@@ -4,6 +4,8 @@ const express = require("express");
 const cookieSession = require('cookie-session');
 //needed for cookie hashing
 const bcrypt = require("bcryptjs");
+//Implements a RESTful API
+const methodOverride = require('method-override')
 
 const app = express();
 
@@ -15,8 +17,10 @@ app.use(cookieSession({
   keys: ['Galo', 'Doido'],
 
   // Cookie Options
-  maxAge: 24 * 60 * 60 * 1000 // 24 hours
+  maxAge: 0.5 * 60 * 60 * 1000 // 30 minutes
 }));
+// override with POST having ?_method=DELETE and ?_method=PUT
+app.use(methodOverride('_method'))
 
 const PORT = 8080; // default port 8080
 //messages to be displayed to the user
@@ -60,7 +64,7 @@ app.get("/fetch", (req, res) => {
 //SERVER ROUTES
 //if the user is logged, renders the list of URLS of this user
 app.get("/urls", (req, res) => {
-  if (!req.session.user_id) {
+  if (!req.session.user_id || !users[req.session.user_id]) {
     //sends an error message to the user indicating access denied
     res.status(403).send(ACCESS_DENIED);
   } else {
@@ -76,7 +80,7 @@ app.get("/urls", (req, res) => {
 
 //creates a new TinyURL in the database
 app.post("/urls", (req, res) => {
-  if (!req.session.user_id) {
+  if (!req.session.user_id || !users[req.session.user_id]) {
     //sends an error message to the user indicating access denied
     res.status(403).send(ACCESS_DENIED);
   } else {
@@ -94,14 +98,15 @@ app.post("/urls", (req, res) => {
 
 //renders the form for creating a new TinyURL
 app.get("/urls/new", (req, res) => {
-  if (!req.session.user_id) {
+  if (!req.session.user_id || !users[req.session.user_id]) {
     //if the user is not logged, redirects it to the log in page
     res.redirect("/login");
   } else {
     const templateVars = {
       user: users[req.session.user_id]
+      
     };
-    
+    console.log(req.session.user_id, users[req.session.user_id]);
     res.render("urls_new", templateVars);
   }
 });
@@ -110,8 +115,8 @@ app.get("/urls/new", (req, res) => {
 app.get("/urls/:id", (req, res) => {
   if (urlDatabase[req.params.id] === undefined) {
     //sends an error message to the user indicating the URL requested does not exist
-    res.status(400).send(UNEXISTING_URL);
-  } else if (!req.session.user_id) {
+    res.status(404).send(UNEXISTING_URL);
+  } else if (!req.session.user_id || !users[req.session.user_id]) {
     //if the user is not logged, sends an error message to the user indicating access denied
     res.status(403).send(ACCESS_DENIED);
   } else if (urlDatabase[req.params.id].userID !== req.session.user_id) {
@@ -129,11 +134,11 @@ app.get("/urls/:id", (req, res) => {
 });
 
 //update the long URL of an existing TibnyURL, if the user created it
-app.post("/urls/:id", (req, res) => {
+app.put("/urls/:id", (req, res) => {
   if (urlDatabase[req.params.id] === undefined) {
     //sends an error message to the user indicating the URL requested does not exist
-    res.status(400).send(UNEXISTING_URL);
-  } else if (!req.session.user_id) {
+    res.status(404).send(UNEXISTING_URL);
+  } else if (!req.session.user_id || !users[req.session.user_id]) {
     //if the user is not logged, sends an error message to the user indicating access denied
     res.status(403).send(ACCESS_DENIED);
   } else if (urlDatabase[req.params.id].userID !== req.session.user_id) {
@@ -147,11 +152,11 @@ app.post("/urls/:id", (req, res) => {
 });
 
 //deletes the TibnyURL, if the user created it
-app.post("/urls/:id/delete", (req, res) => {
+app.delete("/urls/:id", (req, res) => {
   if (urlDatabase[req.params.id] === undefined) {
     //sends an error message to the user indicating the URL requested does not exist
-    res.status(400).send(UNEXISTING_URL);
-  } else if (!req.session.user_id) {
+    res.status(404).send(UNEXISTING_URL);
+  } else if (!req.session.user_id || !users[req.session.user_id]) {
     //if the user is not logged, sends an error message to the user indicating access denied
     res.status(403).send(ACCESS_DENIED);
   } else if (urlDatabase[req.params.id].userID !== req.session.user_id) {
@@ -170,13 +175,13 @@ app.get("/u/:id", (req, res) => {
     res.redirect(urlDatabase[req.params.id].longURL);
   } else {
     //sends an error message to the user indicating the URL requested does not exist
-    res.status(400).send(UNEXISTING_URL);
+    res.status(404).send(UNEXISTING_URL);
   }
 });
 
 //renders the login page
 app.get("/login", (req, res) => {
-  if (req.session.user_id) {
+  if (req.session.user_id && users[req.session.user_id]) {
     //if the user is already logged in, redirects to the list of URLS
     res.redirect("/urls");
   } else {
@@ -211,7 +216,7 @@ app.post("/logout", (req, res) => {
 
 //renders the page for user registration
 app.get("/register", (req, res) => {
-  if (req.session.user_id) {
+  if (req.session.user_id && users[req.session.user_id]) {
     //if the user is already logged in, redirects to the list of URLS
     res.redirect("/urls");
   } else {
