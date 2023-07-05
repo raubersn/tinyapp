@@ -93,6 +93,7 @@ app.post("/urls", (req, res) => {
     urlDatabase[tinyId].userID = req.session.user_id;
     urlDatabase[tinyId].log = [];
     urlDatabase[tinyId].uniqueCounter = 0;
+    urlDatabase[tinyId].dateCreated = Date.now();
 
     res.redirect("/urls/" + tinyId);
   }
@@ -129,7 +130,8 @@ app.get("/urls/:id", (req, res) => {
       longURL: urlDatabase[req.params.id].longURL,
       user: users[req.session.user_id],
       log: urlDatabase[req.params.id].log,
-      uniqueCounter: urlDatabase[req.params.id].uniqueCounter
+      uniqueCounter: urlDatabase[req.params.id].uniqueCounter,
+      dateCreated: urlDatabase[req.params.id].dateCreated
     };
 
     res.render("urls_show", templateVars);

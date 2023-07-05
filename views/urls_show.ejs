@@ -39,20 +39,22 @@
       <div class="card">
         <p>
           <h6 class="card-title" style="margin-bottom: 0%;">Analytics</h6>
-          <table style="margin-left: auto; margin-right: auto;">
+          <table style="margin-left: auto; margin-right: auto;" class="table">
             <tr>
-              <td>Total visits:&nbsp;</td>
-              <td><%= log.length %></td>                
+              <th>Created on</th>
+              <th>Total visits</th>
+              <th>Unique visitors</th>
             </tr>
             <tr>
-              <td>Unique visitors:&nbsp;</td>
-              <td><%= uniqueCounter %></td>                
+              <td><%= new Date(dateCreated) %></td>
+              <td><%= log.length %></td>
+              <td><%= uniqueCounter %></td>
             </tr>
           </table>
         </p>
         <p>
           <h6 class="card-title" style="margin-bottom: 0%;">Visit Log</h6>
-          <table style="margin-left: auto; margin-right: auto;">
+          <table style="margin-left: auto; margin-right: auto;" class="table">
             <tr>
               <th>When</th>
               <th>&nbsp;</th>
