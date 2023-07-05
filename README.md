@@ -22,6 +22,15 @@ TinyApp is a full stack web application built with Node and Express that allows 
 - Install all dependencies (using the `npm install` command).
 - Run the development web server using the `node express_server.js` command.
 
+## Analytics (Stretch)
+
+The editing page of a short URL will present the following metrics:
+- Number of total visit
+- Number os visits by unique users
+- Log of all the visits received, containing when and who made it
+  - If a logged user visited the URL, their ID will be listed
+  - If the user is unknow, their IP is listed instead
+
 ## RESTful API (Stretch)
 
 TinyApp implements a RESTful API following the routing conventions:

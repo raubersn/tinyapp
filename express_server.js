@@ -91,6 +91,8 @@ app.post("/urls", (req, res) => {
     urlDatabase[tinyId] = {};
     urlDatabase[tinyId].longURL = req.body.longURL;
     urlDatabase[tinyId].userID = req.session.user_id;
+    urlDatabase[tinyId].log = [];
+    urlDatabase[tinyId].uniqueCounter = 0;
 
     res.redirect("/urls/" + tinyId);
   }
@@ -103,10 +105,9 @@ app.get("/urls/new", (req, res) => {
     res.redirect("/login");
   } else {
     const templateVars = {
-      user: users[req.session.user_id]
-      
+      user: users[req.session.user_id]      
     };
-    console.log(req.session.user_id, users[req.session.user_id]);
+    
     res.render("urls_new", templateVars);
   }
 });
@@ -126,7 +127,9 @@ app.get("/urls/:id", (req, res) => {
     const templateVars = {
       id: req.params.id,
       longURL: urlDatabase[req.params.id].longURL,
-      user: users[req.session.user_id]
+      user: users[req.session.user_id],
+      log: urlDatabase[req.params.id].log,
+      uniqueCounter: urlDatabase[req.params.id].uniqueCounter
     };
 
     res.render("urls_show", templateVars);
@@ -172,11 +175,23 @@ app.delete("/urls/:id", (req, res) => {
 //navigates to the long URL of a TinyURL
 app.get("/u/:id", (req, res) => {
   if (urlDatabase[req.params.id]) {
+    //tracks the visit to the TinyURL, recording the timestamp and visitor ID if it is a logged user, or the visitor's IP if it is anonimous
+    urlDatabase[req.params.id].log.push({timestamp: Date.now(), visitorID: req.session.user_id ? req.session.user_id : req.ip});
+
+    //checks if the user has visited this TinyURL before. If not, set a cookie for later verification and increments the counter
+    if (!req.session[req.params.id]) {
+      req.session[req.params.id] = true;
+      urlDatabase[req.params.id].uniqueCounter++;
+    }
+    
     res.redirect(urlDatabase[req.params.id].longURL);
   } else {
     //sends an error message to the user indicating the URL requested does not exist
     res.status(404).send(UNEXISTING_URL);
   }
+
+
+
 });
 
 //renders the login page

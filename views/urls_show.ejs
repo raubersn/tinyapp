@@ -35,6 +35,39 @@
           </form>
           
       </div>
+
+      <div class="card">
+        <p>
+          <h6 class="card-title" style="margin-bottom: 0%;">Analytics</h6>
+          <table style="margin-left: auto; margin-right: auto;">
+            <tr>
+              <td>Total visits:&nbsp;</td>
+              <td><%= log.length %></td>                
+            </tr>
+            <tr>
+              <td>Unique visitors:&nbsp;</td>
+              <td><%= uniqueCounter %></td>                
+            </tr>
+          </table>
+        </p>
+        <p>
+          <h6 class="card-title" style="margin-bottom: 0%;">Visit Log</h6>
+          <table style="margin-left: auto; margin-right: auto;">
+            <tr>
+              <th>When</th>
+              <th>&nbsp;</th>
+              <th>Who</th>
+            </tr>
+            <% for (let visit of log) { %>
+              <tr>
+                <td><%= new Date(visit.timestamp) %></td>
+                <td>&nbsp;</td>
+                <td><%= visit.visitorID %></td>                
+              </tr>
+            <% } %>
+          </table>
+        </p>
+      </div>
     </div>
     <!-- Bootstrap JS -->
     <script
